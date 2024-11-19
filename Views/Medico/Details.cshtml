@@ -1,0 +1,59 @@
+@model Turnos.Models.Medico
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Details</title>
+</head>
+<body>
+
+<div>
+    <h4>Mèdico</h4>
+    <hr />
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card blue darken-1">
+                    <div class="card-content white-text">
+                        <span class="card-title"><h5><b>@Html.DisplayFor(model => model.Nombre) @Html.DisplayFor(model => model.Apellido)</b></h5></span>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Direccion) : @Html.DisplayFor(model => model.Direccion)
+                        </dt>
+                        <hr />
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Telefono) : @Html.DisplayFor(model => model.Telefono)
+                        </dt>
+                        <hr />
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Email) : @Html.DisplayFor(model => model.Email)
+                        </dt>
+                        <hr />
+                        <dt>
+                            @Html.DisplayNameFor(model => model.HorarioAtencionDesde) :@Html.DisplayFor(model => model.HorarioAtencionDesde)
+                        </dt>
+                        <hr />
+                        <dt>
+                            @Html.DisplayNameFor(model => model.HorarioAtencionHasta): @Html.DisplayFor(model => model.HorarioAtencionHasta)
+                        </dt>
+                        <hr />
+                        <dt>
+                            @Html.DisplayNameFor(model => model.MedicoEspecialidad[0].Especialidad.Descripcion) : @Html.DisplayFor(model => model.MedicoEspecialidad[0].Especialidad.Descripcion)
+                        </dt>
+                    </div>
+                    <div class="card-action blue-grey darken-2">
+                        <form asp-action="Delete">
+                            <input type="hidden" asp-for="IdMedico" />
+                            <a asp-action="Edit" asp-route-id="@Model?.IdMedico">Editar</a>
+                            <a asp-action="Index" class="right">Volver</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div>
+    |
+</div>
+</body>
+</html>

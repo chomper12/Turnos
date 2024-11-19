@@ -1,0 +1,254 @@
+﻿@model Turnos.Models.Turno
+
+@{
+    ViewBag.Title = "Asignación de Turnos";
+}
+
+<div class="row">
+    <div class="input-field col s6">
+        <label asp-for="IdMedico">Médico</label><br /><br />
+        <select asp-for="IdMedico" asp-items="ViewBag.IdMedico" class="browser-default"></select>
+    </div>
+    <div class="input-field col s6">
+        <label asp-for="IdPaciente">Paciente</label><br /><br />
+        <select asp-for="IdPaciente" asp-items="ViewBag.IdPaciente" class="browser-default"></select>
+        <span asp-validation-for="IdPaciente" class="red-text"></span>
+    </div>
+</div>
+
+<br />
+<div id="ModalTurno" class="modal">
+    <div class="modal-content">
+        <h4>Turno</h4>
+        <form>
+            <div>
+                <label>Inicio</label>
+                <input type="text" id="txtFechaHoraInicio" readonly="readonly" />
+            </div>
+            <div>
+                <label>Fin</label>
+                <input type="text" id="txtFechaHoraFin" readonly="readonly" />
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="#" id="btnEliminar" class="modal-close waves-effect waves-red btn-flat">Eliminar</a>
+        <a href="#" id="btnGuardar" class="modal-close waves-effect waves-green btn-flat">Guardar</a>
+        <a href="#" id="btnCerrar" class="modal-close waves-effect waves-grey btn-flat">Cerrar</a>
+    </div>
+</div>
+<div id="CalendarioTurnos"></div>
+
+<link href="~/fullcalendar/fullcalendar-3.10.0/fullcalendar.css" rel="stylesheet" />
+<link href="~/fullcalendar/fullcalendar-3.10.0/fullcalendar.print.css" rel="stylesheet" media="print" />
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="~/fullcalendar/fullcalendar-3.10.0/fullcalendar.min.js"></script>
+    <script src="~/fullcalendar/fullcalendar-3.10.0/locale/es.js"></script>
+
+    <script>
+            $(document).ready(function () {
+                $('.modal').modal(); // Inicializa los modales de Materialize
+                var horarioDesde = "";
+                var horarioHasta = "";
+                var turnos = [];
+                var turnoSeleccionado = {};
+
+                // Asegúrate de que hay un médico seleccionado
+                if ($('#IdMedico').val() === null || $('#IdMedico').val() === "") {
+                    $('#IdMedico').val($('#IdMedico option:first').val());
+                }
+
+                // Inicializa con el valor actual del médico
+                ObtenerTurnosYActualizar($('#IdMedico').val());
+
+                // Cambio en la selección de médico
+                $('#IdMedico').change(function () {
+                    ObtenerTurnosYActualizar(this.value);
+                });
+
+                function ObtenerTurnosYActualizar(idMedico) {
+                    turnos = [];
+                    $.ajax({
+                        type: "GET",
+                        url: "/Turno/ObtenerTurnos",
+                        data: { 'IdMedico': idMedico },
+                        success: function (datos) {
+                            console.log("Datos recibidos del servidor:", datos); // Verifica la respuesta completa del servidor
+                            $.each(datos, function (i, v) {
+                                if (v.idTurno && v.idPaciente && v.idMedico && v.fechaHoraInicio && v.fechaHoraFin) {
+                                    var tituloEvento = v.paciente ? "Paciente: " + v.paciente : "Paciente: " + v.idPaciente;
+
+                                    // Verifica las fechas de inicio y fin en la consola
+                                    console.log("Fecha inicio original:", v.fechaHoraInicio, "Fecha fin original:", v.fechaHoraFin);
+
+                                    turnos.push({
+                                        id: v.idTurno.toString(), // Convierte a string si es necesario
+                                        idPaciente: v.idPaciente,
+                                        idMedico: v.idMedico,
+                                        title: tituloEvento,
+                                        start: moment(v.fechaHoraInicio).utc().local().format(), // Ajusta a la zona horaria local
+                                        end: moment(v.fechaHoraFin).utc().local().format() // Ajusta a la zona horaria local
+                                    });
+
+                                    // Verifica las fechas ajustadas en la consola
+                                    console.log("Fecha inicio ajustada:", moment(v.fechaHoraInicio).utc().local().format());
+                                    console.log("Fecha fin ajustada:", moment(v.fechaHoraFin).utc().local().format());
+                                } else {
+                                    console.warn("Turno inválido detectado: ", v); // Log para eventos inválidos
+                                }
+                            });
+
+                            console.log("Turnos generados para el calendario:", turnos); // Verifica los eventos antes de inicializar el calendario
+                            GenerarCalendario(turnos);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error en la solicitud: ", status, error);
+                        }
+                    });
+                }
+
+                function GenerarCalendario(turnos) {
+                    // Obtener el horario de atención del médico
+                    $.ajax({
+                        type: "GET",
+                        url: "/Medico/TraerHorarioAtencionDesde",
+                        data: { "idMedico": $('#IdMedico').val() },
+                        async: false,
+                        success: function (resultado) {
+                            horarioDesde = resultado;
+                        },
+                        error: function () {
+                            alert("Error al traer el horario de atención desde el médico.");
+                        }
+                    });
+
+                    $.ajax({
+                        type: "GET",
+                        url: "/Medico/TraerHorarioAtencionHasta",
+                        data: { "idMedico": $('#IdMedico').val() },
+                        async: false,
+                        success: function (resultado) {
+                            horarioHasta = resultado;
+                        },
+                        error: function () {
+                            alert("Error al traer el horario de atención hasta el médico.");
+                        }
+                    });
+
+                    // Asegúrate de destruir el calendario antes de volver a generarlo
+                    if ($('#CalendarioTurnos').hasClass('fc')) {
+                        $('#CalendarioTurnos').fullCalendar('destroy');
+                    }
+
+                    // Inicializa el calendario
+                    $('#CalendarioTurnos').fullCalendar({
+                        timeZone: 'UTC',  // Asegura el uso de la zona horaria local
+                        contentHeight: 'auto',
+                        defaultDate: new Date(),
+                        slotLabelFormat: "HH:mm",
+                        defaultView: 'agendaWeek',
+                        header: {
+                            left: 'prev,next today',
+                            right: 'month,agendaWeek,agendaDay',
+                        },
+                        slotDuration: '00:30',
+                        nowIndicator: true,
+                        allDaySlot: false,
+                        selectable: true,
+                        eventLimit: true, // Asegúrate de que está configurado en false para mostrar todos los eventos
+                        minTime: horarioDesde, // Ajusta según el horario de tu médico
+                        maxTime: horarioHasta, // Ajusta según el horario de tu médico
+
+                        events: turnos, // Asigna el array de eventos directamente
+                        selectOverlap: true, // Permite la selección de eventos que se superpongan
+                        select: function (start, end) {
+                            turnoSeleccionado = {
+                                idTurno: 0,
+                                start: start,
+                                end: end
+                            };
+                            AbrirPopup();
+                        },
+                    });
+                }
+
+            function AbrirPopup() {
+                if (!turnoSeleccionado.start || !turnoSeleccionado.end) {
+                    console.error("Turno seleccionado o sus propiedades start/end no están definidos.");
+                    return;
+                }
+
+                $('#txtFechaHoraInicio').val(turnoSeleccionado.start.format('DD/MM/YYYY HH:mm'));
+                $('#txtFechaHoraFin').val(turnoSeleccionado.end.format('DD/MM/YYYY HH:mm'));
+
+                if (turnoSeleccionado.idTurno === 0) {
+                    $('#btnGuardar').show();
+                    $('#btnEliminar').hide();
+                } else {
+                    $('#btnGuardar').hide();
+                    $('#btnEliminar').show();
+                }
+
+                $('#ModalTurno').modal('open');
+            }
+
+            $('#btnGuardar').click(function () {
+                var datosDelTurno = {
+                    idPaciente: $('#IdPaciente').val(),
+                    idMedico: $('#IdMedico').val(),
+                    FechaHoraInicio: $('#txtFechaHoraInicio').val(),
+                    FechaHoraFin: $('#txtFechaHoraFin').val(),
+                };
+                GrabarTurno(datosDelTurno);
+            });
+
+            function GrabarTurno(data) {
+                $.ajax({
+                    type: "POST",
+                    url: '/Turno/GrabarTurno',
+                    data: { 'turno': data },
+                    success: function (e) {
+                        console.log(e); // Asegúrate de que devuelva lo esperado
+                        if (e.ok) {
+                            ObtenerTurnosYActualizar($('#IdMedico').val());
+                        } else {
+                            alert('No se pudo grabar el turno.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error en la grabación del turno: ", status, error);
+                    }
+                });
+            }
+
+            $('#btnEliminar').click(function () {
+                if (turnoSeleccionado.idTurno !== 0) {
+                    $.ajax({
+                        type: "POST",
+                        url: '/Turno/EliminarTurno',
+                        data: { 'idTurno': turnoSeleccionado.idTurno },
+                        success: function (e) {
+                            console.log(e);
+                            if (e.ok) {
+                                ObtenerTurnosYActualizar($('#IdMedico').val());
+                            } else {
+                                alert('No se pudo eliminar el turno.');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error en la eliminación del turno: ", status, error);
+                        }
+                    });
+                }
+            });
+
+            $('#btnCerrar').click(function () { 
+                turnoSeleccionado = {};
+            });
+        });
+
+    </script>
+
+}

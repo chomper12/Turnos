@@ -1,0 +1,45 @@
+﻿@model Turnos.Models.Paciente
+<div>
+    @if (Model != null)
+    {
+        <h3>¿Esta usted seguro de eliminar el siguiente registro?</h3>
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card green accent-3">
+                    <div class="card-content white-text">
+                        <span class="card-title">
+                            <h5>
+                                <b>
+                                    @Html.DisplayFor(modelo => modelo.Nombre) @Html.DisplayFor(modelo => modelo.Apellido)
+                                </b>
+                            </h5>
+                        </span>
+                        <dt class="col-md-2">
+                            @Html.DisplayNameFor(modelo => modelo.Direccion) : @Html.DisplayFor(modelo => modelo.Direccion)
+                        </dt>
+                        <hr />
+                        <dt class="col-md-2">
+                            @Html.DisplayNameFor(modelo => modelo.Telefono) : @Html.DisplayFor(modelo => modelo.Telefono)
+                        </dt>
+                        <hr />
+                        <dt class="col-md-2">
+                            @Html.DisplayNameFor(modelo => modelo.Email) : @Html.DisplayFor(modelo => modelo.Email)
+                        </dt>
+                    </div>
+                    <div class="card-action  green darken-2">
+                        <form asp-action="Delete">
+                            <input type="hidden" asp-for="IdPaciente" />
+                            <input type="submit" value="Eliminar" class="btn-small waves-effect waves-light orange lighten-2"/>
+                            <a asp-action="Index" class="right">Volver</a>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h3>No hay datos disponibles para mostrar.</h3>
+    }
+</div>

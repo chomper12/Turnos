@@ -1,0 +1,88 @@
+@model Turnos.Models.Medico
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Create</title>
+    <!-- Asegúrate de incluir los estilos y scripts de Materialize -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="~/css/materialize.min.css" rel="stylesheet" />
+</head>
+<body>
+    <h4>Medico</h4>
+    <hr />
+    <div class="row">
+        <div>
+            <form class="col s12" asp-action="Create">
+                <div asp-validation-summary="ModelOnly"></div>
+                <div class="row">
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">account_circle</i>
+                        <input asp-for="Nombre" type="text" class="validate">
+                        <label asp-for="Nombre"></label>
+                        <span asp-validation-for="Nombre"></span>
+                    </div>
+                    <div class="input-field col s6">
+                        <input asp-for="Apellido" type="text" class="validate">
+                        <label asp-for="Apellido"></label>
+                        <span asp-validation-for="Apellido"></span>
+                    </div>
+                    <div class="input-field col s12">
+                        <i class="material-icons prefix">markunread_mailbox</i>
+                        <input asp-for="Direccion" type="text" class="validate">
+                        <label asp-for="Direccion"></label>
+                        <span asp-validation-for="Direccion"></span>
+                    </div>
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">phone</i>
+                        <input asp-for="Telefono" type="tel" class="validate">
+                        <label asp-for="Telefono"></label>
+                        <span asp-validation-for="Telefono"></span>
+                    </div>
+
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">local_post_office</i>
+                        <input asp-for="Email" type="email" class="validate">
+                        <label asp-for="Email"></label>
+                        <span asp-validation-for="Email"></span>
+                    </div>
+
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">event_note</i>
+                        <input asp-for="HorarioAtencionDesde" type="text" class="timepicker validate">
+                        <label asp-for="HorarioAtencionDesde">Desde</label>
+                        <span asp-validation-for="HorarioAtencionDesde"></span>
+                    </div>
+
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">event_note</i>
+                        <input asp-for="HorarioAtencionHasta" type="text" class="timepicker validate">
+                        <label asp-for="HorarioAtencionHasta">Hasta</label>
+                        <span asp-validation-for="HorarioAtencionHasta"></span>
+                    </div>
+
+                    <div class="input-field col s12">
+                        <label>Especialidades</label>
+                        <br />
+                        <br />
+                        <select name="IdEspecialidad" asp-items="ViewBag.ListaEspecialidades" class="browser-default">
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col s6 m6">
+                        <input type="submit" value="Guardar" class="btn waves-effect waves-light cyan accent-4" />
+                    </div>
+                    <div class="col s6 m6">
+                        
+                        <a asp-action="Index" class="btn waves-effect waves-light"><i class="material-icons prefix">undo</i>Volver</a>
+                    </div>
+                </div>
+               
+            </form>
+        </div>
+    </div>
+
+    
+</body>
+</html>

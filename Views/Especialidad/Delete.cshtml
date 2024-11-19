@@ -1,0 +1,20 @@
+﻿@model Turnos.Models.Especialidad
+<h3>¿Está seguro que deseas eliminar esta especialidad?</h3>
+<div class="row">
+    <div class="col s12 m6">
+        <div class="card red accent-3">
+            <div class="card-content white-text">
+                <dt>
+                    @Html.DisplayFor(modelo => modelo.Descripcion) : @Html.DisplayNameFor(modelo => modelo.Descripcion) 
+                </dt>
+            </div>
+            <div class="card-action red darken-2">
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="IdEspecialidad" />
+                    <input type="submit" value="Eliminar" class="btn-small waves-effect waves-light red lighten-2" />
+                    <a asp-action="Index" class="right">Volver</a>
+                </form>
+            </div>
+        </div>
+    </div>  
+</div>
